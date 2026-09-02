@@ -1,0 +1,42 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('characters', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('external_id')->unique()->index();
+            $table->string('name');
+            $table->string('status');
+            $table->string('species');
+            $table->string('type')->nullable(); // nullable debido a que la API entrega este campo vacío frecuentemente
+            $table->string('gender');
+            $table->string('image');
+
+            // Claves foráneas duales apuntando a la tabla locations.
+            // Usamos onDelete('set null') para que, si una localización se borra, el personaje conserve su registro
+            $table->foreignId('origin_location_id')
+                ->nullable()
+                ->constrained('locations')
+                ->onDelete('set null');
+
+            $table->foreignId('current_location_id')
+                ->nullable()
+                ->constrained('locations')
+                ->onDelete('set null');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('characters');
+    }
+};
+
